@@ -60,10 +60,35 @@ app.get("/books/:id", async (request, response) => {
     const book = await Book.findById(id);
 
     if (!book) {
-      return response.status(200).json({ message: "Book not found" });
+      return response.status(404).json({ message: "Book not found" });
+    }
+    return response.status(200).json({ book });
+  } catch (error) {
+    console.log(error.message);
+    response.status(500).send({ message: error.message });
+  }
+});
+
+// Route gor Update a Book
+app.put("/books/:id", async (request, response) => {
+  try {
+    if (
+      !request.body.title ||
+      !request.body.author ||
+      !request.body.publishYear
+    ) {
+      return response.status(400).send({
+        message: "Sends all required fields: title, author, publishYear",
+      });
     }
 
-    return response.status(200).json({ book });
+    const { id } = request.params;
+    const result = await Book.findByIdAndUpdate(id, request.body);
+
+    if (!result) {
+      return response.status(404).json({ message: "Book not found" });
+    }
+    return response.status(200).json({ message: "Book updates successfully" });
   } catch (error) {
     console.log(error.message);
     response.status(500).send({ message: error.message });
